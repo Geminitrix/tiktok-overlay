@@ -28,6 +28,15 @@ export default defineConfig(() => {
         },
       },
     ],
+    build: {
+      rollupOptions: {
+        // O overlay em overlay/index.html também é publicado (prévia do estúdio + GitHub Pages)
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+          overlay: path.resolve(__dirname, 'overlay/index.html'),
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
