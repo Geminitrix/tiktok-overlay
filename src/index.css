@@ -1,0 +1,363 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    --font-display: "Cinzel", Georgia, serif;
+    --font-ornate: "Cinzel Decorative", "Cinzel", Georgia, serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #08070b;
+    color: #ede8f2;
+  }
+}
+
+.font-coven {
+  font-family: var(--font-display);
+}
+
+.font-coven-ornate {
+  font-family: var(--font-ornate);
+}
+
+.font-code {
+  font-family: var(--font-mono);
+}
+
+/* Transparent overlay mode resets html/body to full transparency for TikTok LIVE Studio */
+html.overlay-live-mode,
+body.overlay-live-mode {
+  background: transparent !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Studio checkerboard for transparent cutout inspection */
+.studio-checkerboard {
+  background-color: #100e14;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+/* ===== Coven Morgana Overlay Animations ===== */
+.coven-particles-clip {
+  clip-path: path(evenodd, "M0 0H1080V1920H0Z M60 190h960v540h-960Z M40 892h1000v563h-1000Z");
+}
+
+.coven-pulse {
+  animation: coven-pulse 3.2s ease-in-out infinite;
+}
+
+.coven-gem {
+  animation: coven-gem 3.4s ease-in-out infinite;
+}
+
+.coven-orb-glow {
+  animation: coven-orb-pulse 4.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.coven-spin-cw {
+  animation: coven-spin 130s linear infinite;
+  transform-box: view-box;
+}
+
+.coven-spin-ccw {
+  animation: coven-spin 96s linear infinite reverse;
+  transform-box: view-box;
+}
+
+.coven-wing-l {
+  animation: coven-sway-l 6.8s ease-in-out infinite;
+  transform-box: view-box;
+}
+
+.coven-wing-r {
+  animation: coven-sway-r 6.8s ease-in-out infinite;
+  transform-box: view-box;
+}
+
+.coven-swirl {
+  stroke-dasharray: 220 75;
+  animation: coven-swirl 4.4s linear infinite;
+}
+
+.coven-swirl-alt {
+  stroke-dasharray: 160 90;
+  animation: coven-swirl 6.4s linear infinite reverse;
+}
+
+.coven-mist-a {
+  animation: coven-drift-a 19s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.coven-mist-b {
+  animation: coven-drift-b 25s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.coven-candle-flame {
+  animation: coven-candle-flicker 2.1s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+.coven-candle-flame-alt {
+  animation: coven-candle-flicker 1.85s ease-in-out infinite -0.7s;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+.coven-candle-halo {
+  animation: coven-halo-breathe 2.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.coven-monolith-rune {
+  animation: coven-monolith-breathe 4.6s ease-in-out infinite;
+}
+
+.coven-art-breathe {
+  animation: coven-art-breathe 11s ease-in-out infinite alternate;
+  transform-origin: center bottom;
+}
+
+/* Interactive hotspots inside overlay */
+.coven-interactive-sigil {
+  cursor: pointer;
+  transition: filter 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
+}
+
+.coven-interactive-sigil .coven-hover-runes {
+  opacity: 0.12;
+  transition: opacity 0.45s ease, filter 0.45s ease;
+}
+
+.coven-interactive-sigil:hover .coven-hover-runes,
+.coven-interactive-sigil[data-active="true"] .coven-hover-runes {
+  opacity: 0.95;
+  filter: drop-shadow(0 0 10px rgba(255, 68, 102, 0.85));
+}
+
+.coven-interactive-orb {
+  cursor: pointer;
+  transition: transform 0.35s ease, filter 0.35s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.coven-interactive-orb:hover,
+.coven-interactive-orb[data-active="true"] {
+  transform: scale(1.16);
+  filter: drop-shadow(0 0 14px rgba(255, 62, 98, 0.95));
+}
+
+.coven-ripple {
+  animation: coven-ripple-expand 1.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.coven-ember {
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0;
+  animation: coven-rise linear infinite;
+  will-change: transform, opacity;
+}
+
+.coven-feather-fall {
+  position: absolute;
+  opacity: 0;
+  animation: coven-fall linear infinite;
+  will-change: transform, opacity;
+}
+
+.coven-feather-inner {
+  width: 100%;
+  height: 100%;
+  animation: coven-flutter 2.8s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.coven-raven-flight {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.coven-raven-flight-ltr {
+  animation: coven-raven-ltr 6.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.coven-raven-flight-rtl {
+  animation: coven-raven-rtl 6.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.coven-raven-wing-flap {
+  animation: coven-wing-beat 0.58s ease-in-out infinite alternate;
+  transform-origin: 50% 52%;
+}
+
+.coven-surge-wave {
+  animation: coven-surge-ring 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes coven-pulse {
+  0%, 100% { opacity: 0.48; }
+  50% { opacity: 0.98; }
+}
+
+@keyframes coven-gem {
+  0%, 100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+
+@keyframes coven-orb-pulse {
+  0%, 100% { opacity: 0.65; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes coven-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes coven-sway-l {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-3.2deg); }
+}
+
+@keyframes coven-sway-r {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(3.2deg); }
+}
+
+@keyframes coven-swirl {
+  to { stroke-dashoffset: -295; }
+}
+
+@keyframes coven-drift-a {
+  from { transform: translate(-36px, 12px) scale(1); }
+  to { transform: translate(42px, -24px) scale(1.14); }
+}
+
+@keyframes coven-drift-b {
+  from { transform: translate(34px, -16px) scale(1.08); }
+  to { transform: translate(-38px, 22px) scale(0.96); }
+}
+
+@keyframes coven-candle-flicker {
+  0%   { transform: scaleY(0.96) scaleX(1.02) skewX(-1.5deg); opacity: 0.92; }
+  22%  { transform: scaleY(1.07) scaleX(0.95) skewX(2deg); opacity: 1; }
+  48%  { transform: scaleY(0.92) scaleX(1.04) skewX(-2deg); opacity: 0.88; }
+  74%  { transform: scaleY(1.05) scaleX(0.97) skewX(1.2deg); opacity: 0.98; }
+  100% { transform: scaleY(0.96) scaleX(1.02) skewX(-1.5deg); opacity: 0.92; }
+}
+
+@keyframes coven-halo-breathe {
+  0%, 100% { opacity: 0.34; transform: scale(0.94); }
+  50% { opacity: 0.62; transform: scale(1.08); }
+}
+
+@keyframes coven-monolith-breathe {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.95; }
+}
+
+@keyframes coven-art-breathe {
+  from { transform: scale(1) translateY(0px); }
+  to { transform: scale(1.032) translateY(-6px); }
+}
+
+@keyframes coven-rise {
+  0%   { transform: translate(0, 0) scale(0.75); opacity: 0; }
+  12%  { opacity: var(--o, 0.8); }
+  52%  { transform: translate(var(--dx, 24px), calc(var(--dy, -400px) * 0.5)) scale(1.05); }
+  86%  { opacity: var(--o, 0.8); }
+  100% { transform: translate(calc(var(--dx, 24px) * -0.45), var(--dy, -400px)) scale(0.5); opacity: 0; }
+}
+
+@keyframes coven-fall {
+  0%   { transform: translate(0, 0) rotate(var(--r0, -25deg)); opacity: 0; }
+  12%  { opacity: 0.88; }
+  84%  { opacity: 0.82; }
+  100% { transform: translate(var(--dx, 70px), 780px) rotate(var(--r1, 120deg)); opacity: 0; }
+}
+
+@keyframes coven-flutter {
+  from { transform: rotate(-20deg) scaleX(0.92); }
+  to   { transform: rotate(20deg) scaleX(1.06); }
+}
+
+@keyframes coven-raven-ltr {
+  0%   { transform: translate(-180px, 34px) scale(0.84) rotate(-6deg); opacity: 0; }
+  12%  { opacity: 0.82; }
+  50%  { transform: translate(540px, -22px) scale(1.02) rotate(3deg); opacity: 0.88; }
+  86%  { opacity: 0.72; }
+  100% { transform: translate(1260px, -56px) scale(0.86) rotate(-4deg); opacity: 0; }
+}
+
+@keyframes coven-raven-rtl {
+  0%   { transform: translate(1260px, 28px) scaleX(-0.84) scaleY(0.84) rotate(-6deg); opacity: 0; }
+  12%  { opacity: 0.82; }
+  50%  { transform: translate(540px, -18px) scaleX(-1.02) scaleY(1.02) rotate(3deg); opacity: 0.88; }
+  86%  { opacity: 0.72; }
+  100% { transform: translate(-180px, -50px) scaleX(-0.86) scaleY(0.86) rotate(-4deg); opacity: 0; }
+}
+
+@keyframes coven-wing-beat {
+  from { transform: scaleY(1) translateY(0px); }
+  to   { transform: scaleY(0.52) translateY(6px); }
+}
+
+@keyframes coven-ripple-expand {
+  0%   { transform: scale(0.5); opacity: 0.92; }
+  100% { transform: scale(3.4); opacity: 0; }
+}
+
+@keyframes coven-surge-ring {
+  0%   { transform: scale(0.65); opacity: 0.85; stroke-width: 5; }
+  100% { transform: scale(1.55); opacity: 0; stroke-width: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coven-pulse,
+  .coven-gem,
+  .coven-orb-glow,
+  .coven-spin-cw,
+  .coven-spin-ccw,
+  .coven-wing-l,
+  .coven-wing-r,
+  .coven-swirl,
+  .coven-swirl-alt,
+  .coven-mist-a,
+  .coven-mist-b,
+  .coven-candle-flame,
+  .coven-candle-flame-alt,
+  .coven-candle-halo,
+  .coven-monolith-rune,
+  .coven-art-breathe,
+  .coven-ember,
+  .coven-feather-fall,
+  .coven-feather-inner {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

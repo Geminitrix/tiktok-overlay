@@ -1,0 +1,6 @@
+{
+  "name": "Congregação Overlay — Coven Morgana",
+  "description": "Estúdio e overlay vertical 1080x1920 para TikTok Live inspirado em Morgana Congregação das Bruxas, com animações arcanas, elementos interativos e kit pronto para GitHub Pages.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
