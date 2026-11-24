@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CovenOverlayStage } from './components/CovenOverlayStage';
 import { ControlPanel } from './components/ControlPanel';
 import { StudioHeader, StudioTab } from './components/StudioHeader';
 import {
   DEFAULT_REPO_NAME,
-  MORGANA_ASSET_PATH,
+  OVERLAY_PATH,
   OverlayConfig,
   STAGE_HEIGHT,
   STAGE_WIDTH,
@@ -14,6 +13,14 @@ import {
   sanitizeRepoName,
 } from './utils/overlayConfig';
 import { generateGithubReadme, generateStandaloneOverlayHtml } from './utils/exportHtml';
+import overlayTemplate from '../overlay/index.html?raw';
+import morganaArtUrl from '../overlay/morgana.png';
+
+function withParam(query: string, key: string, value: string): string {
+  const q = new URLSearchParams(query);
+  q.set(key, value);
+  return `?${q.toString()}`;
+}
 
 async function loadAssetAsDataUrl(assetPath: string): Promise<string> {
   const response = await fetch(assetPath);
@@ -59,37 +66,21 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<StudioTab>('personalizar');
   const [previewBackdrop, setPreviewBackdrop] = useState<'simulated' | 'checkerboard'>('simulated');
-  const [ravenTrigger, setRavenTrigger] = useState(0);
-  const [surgeTrigger, setSurgeTrigger] = useState(0);
   const [repoName, setRepoName] = useState(DEFAULT_REPO_NAME);
   const [githubUser, setGithubUser] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const embeddedArtCache = useRef<string | null>(null);
+  const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
   const previewWrapRef = useRef<HTMLDivElement | null>(null);
   const [previewScale, setPreviewScale] = useState(0.36);
 
-  // Full-screen live overlay scaling & transparent body class
-  const [liveViewport, setLiveViewport] = useState(() => ({
-    width: typeof window !== 'undefined' ? window.innerWidth : STAGE_WIDTH,
-    height: typeof window !== 'undefined' ? window.innerHeight : STAGE_HEIGHT,
-  }));
-
+  // Modo live (?modo=overlay): abre direto o overlay publicado
   useEffect(() => {
     if (!isLiveOverlay) return;
-    document.documentElement.classList.add('overlay-live-mode');
-    document.body.classList.add('overlay-live-mode');
-    const onResize = () => {
-      setLiveViewport({ width: window.innerWidth, height: window.innerHeight });
-    };
-    window.addEventListener('resize', onResize);
-    return () => {
-      document.documentElement.classList.remove('overlay-live-mode');
-      document.body.classList.remove('overlay-live-mode');
-      window.removeEventListener('resize', onResize);
-    };
-  }, [isLiveOverlay]);
+    window.location.replace(`${OVERLAY_PATH}${buildOverlayQuery(config)}`);
+  }, [isLiveOverlay, config]);
 
   // Responsive 9:16 preview sizing inside Studio
   useEffect(() => {
@@ -115,11 +106,11 @@ export default function App() {
   const getEmbeddedArt = useCallback(async (): Promise<string> => {
     if (embeddedArtCache.current) return embeddedArtCache.current;
     try {
-      const dataUrl = await loadAssetAsDataUrl(MORGANA_ASSET_PATH);
+      const dataUrl = await loadAssetAsDataUrl(morganaArtUrl);
       embeddedArtCache.current = dataUrl;
       return dataUrl;
     } catch {
-      return MORGANA_ASSET_PATH;
+      return 'morgana.png';
     }
   }, []);
 
@@ -134,8 +125,8 @@ export default function App() {
     async (embedArt = true) => {
       setIsExporting(true);
       try {
-        const artSrc = embedArt ? await getEmbeddedArt() : 'assets/morgana-coven.png';
-        const html = generateStandaloneOverlayHtml(config, artSrc);
+        const artSrc = embedArt ? await getEmbeddedArt() : 'morgana.png';
+        const html = generateStandaloneOverlayHtml(overlayTemplate, config, artSrc);
         triggerFileDownload('index.html', html, 'text/html;charset=utf-8');
         showNotice('index.html pronto para GitHub Pages e TikTok LIVE Studio.');
       } finally {
@@ -159,7 +150,7 @@ export default function App() {
     setIsExporting(true);
     try {
       const artSrc = await getEmbeddedArt();
-      const html = generateStandaloneOverlayHtml(config, artSrc);
+      const html = generateStandaloneOverlayHtml(overlayTemplate, config, artSrc);
       await navigator.clipboard.writeText(html);
       showNotice('Código HTML completo copiado para a área de transferência.');
     } catch {
@@ -178,6 +169,21 @@ export default function App() {
     }
   }, [readmePreview, showNotice]);
 
+  // Prévia: o próprio overlay em um iframe (recarrega com um pequeno atraso ao editar)
+  const previewQuery = useMemo(() => {
+    const base = buildOverlayQuery(config);
+    return previewBackdrop === 'simulated' ? withParam(base, 'demo', '1') : base;
+  }, [config, previewBackdrop]);
+  const [previewSrc, setPreviewSrc] = useState(() => `${OVERLAY_PATH}${previewQuery}`);
+  useEffect(() => {
+    const id = window.setTimeout(() => setPreviewSrc(`${OVERLAY_PATH}${previewQuery}`), 400);
+    return () => window.clearTimeout(id);
+  }, [previewQuery]);
+
+  const triggerSurge = useCallback(() => {
+    previewFrameRef.current?.contentWindow?.postMessage({ type: 'coven:surge' }, '*');
+  }, []);
+
   const liveOverlayQuery = useMemo(
     () => buildOverlayQuery(config, { includeLiveFlag: true }),
     [config]
@@ -188,30 +194,9 @@ export default function App() {
     return `${window.location.origin}/${liveOverlayQuery}`;
   }, [liveOverlayQuery]);
 
-  // PURE LIVE OVERLAY MODE (?modo=overlay or ?live=1)
+  // PURE LIVE OVERLAY MODE (?modo=overlay or ?live=1) — redireciona para o overlay
   if (isLiveOverlay) {
-    const scale = Math.min(liveViewport.width / STAGE_WIDTH, liveViewport.height / STAGE_HEIGHT);
-    const offsetX = (liveViewport.width - STAGE_WIDTH * scale) / 2;
-    const offsetY = (liveViewport.height - STAGE_HEIGHT * scale) / 2;
-
-    return (
-      <main
-        aria-label="Overlay TikTok Live Congregação das Bruxas"
-        className="fixed inset-0 overflow-hidden bg-transparent"
-      >
-        <div
-          style={{
-            position: 'absolute',
-            left: `${offsetX}px`,
-            top: `${offsetY}px`,
-            width: `${STAGE_WIDTH * scale}px`,
-            height: `${STAGE_HEIGHT * scale}px`,
-          }}
-        >
-          <CovenOverlayStage config={config} scale={scale} previewBackdrop="none" />
-        </div>
-      </main>
-    );
+    return null;
   }
 
   // STUDIO MODE
@@ -241,20 +226,24 @@ export default function App() {
                 <strong className="font-medium text-[#e7dcc4]">1080 × 1920</strong>
               </span>
               <span className="hidden sm:inline">
-                Clique nos orbes ou passe o mouse no brasão
+                Mova o mouse ou clique fora dos recortes para soltar faíscas
               </span>
             </div>
 
             <div
               style={{ width: `${scaledWidth}px`, height: `${scaledHeight}px` }}
-              className="relative overflow-hidden rounded-lg border border-[#322940] shadow-[0_24px_60px_rgba(0,0,0,0.75)]"
+              className={`relative overflow-hidden rounded-lg border border-[#322940] shadow-[0_24px_60px_rgba(0,0,0,0.75)] ${
+                previewBackdrop === 'checkerboard' ? 'studio-checkerboard' : 'bg-[#2b2b30]'
+              }`}
             >
-              <CovenOverlayStage
-                config={config}
-                scale={previewScale}
-                previewBackdrop={previewBackdrop}
-                ravenTrigger={ravenTrigger}
-                surgeTrigger={surgeTrigger}
+              <iframe
+                ref={previewFrameRef}
+                title="Prévia do overlay"
+                src={previewSrc}
+                width={scaledWidth}
+                height={scaledHeight}
+                className="block border-0"
+                style={{ colorScheme: 'normal', background: 'transparent' }}
               />
             </div>
 
@@ -275,8 +264,7 @@ export default function App() {
             onChange={setConfig}
             previewBackdrop={previewBackdrop}
             onPreviewBackdropChange={setPreviewBackdrop}
-            onTriggerRaven={() => setRavenTrigger((n) => n + 1)}
-            onTriggerSurge={() => setSurgeTrigger((n) => n + 1)}
+            onTriggerSurge={triggerSurge}
             onDownloadHtml={handleDownloadHtml}
             onDownloadReadme={handleDownloadReadme}
             onCopyHtml={handleCopyHtml}

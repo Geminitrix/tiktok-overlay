@@ -4,7 +4,6 @@ import {
   Copy,
   Download,
   ExternalLink,
-  Feather,
   FileCode2,
   FileText,
   Flame,
@@ -26,7 +25,6 @@ interface ControlPanelProps {
   onChange: (next: OverlayConfig) => void;
   previewBackdrop: 'simulated' | 'checkerboard';
   onPreviewBackdropChange: (mode: 'simulated' | 'checkerboard') => void;
-  onTriggerRaven: () => void;
   onTriggerSurge: () => void;
   onDownloadHtml: (embedArt: boolean) => void;
   onDownloadReadme: () => void;
@@ -90,7 +88,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onChange,
   previewBackdrop,
   onPreviewBackdropChange,
-  onTriggerRaven,
   onTriggerSurge,
   onDownloadHtml,
   onDownloadReadme,
@@ -218,15 +215,15 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 htmlFor="input-rodape"
                 className="mb-1 block text-xs font-medium tracking-wide text-[#cfc6db]"
               >
-                Inscrição do altar inferior
+                Mensagens do rodapé (separe com | para alternar)
               </label>
               <input
                 id="input-rodape"
                 type="text"
-                maxLength={52}
+                maxLength={220}
                 value={config.rodape}
                 onChange={(e) => onChange({ ...config, rodape: e.target.value })}
-                placeholder="BEM-VINDOS À CONGREGAÇÃO"
+                placeholder="BEM-VINDOS|SIGA O CANAL|DEIXE SEU LIKE"
                 className="w-full rounded-lg border border-[#2c2538] bg-[#14111c] px-3 py-2 text-sm text-[#f7f2fa] placeholder-[#6f677f] transition-colors focus:border-[#c59e54] focus:outline-none"
               />
             </div>
@@ -241,15 +238,15 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <ToggleRow
                 id="toggle-fundo"
                 label="Fundo escuro da floresta"
-                description="Névoa carmesim, monólitos do Deus Antigo e fundo obsidiana fora dos recortes."
+                description="Obsidiana com névoa carmesim e petróleo em movimento, fora dos recortes."
                 checked={config.fundo}
                 onToggle={(fundo) => onChange({ ...config, fundo })}
               />
 
               <ToggleRow
                 id="toggle-arte"
-                label="Splash art da Morgana no altar"
-                description="Integra a imagem enviada na base inferior com fusão suave para não poluir o chat."
+                label="Arte da Morgana no rodapé"
+                description="Splash art com fusão suave na base, sem disputar atenção com o chat."
                 checked={config.arte}
                 onToggle={(arte) => onChange({ ...config, arte })}
               />
@@ -259,7 +256,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               <div className="mt-2 rounded-lg border border-[#221c2d] bg-[#13101a] px-3.5 py-2.5">
                 <div className="flex items-center justify-between text-xs">
                   <label htmlFor="slider-opacidade" className="font-medium text-[#d8cfe4]">
-                    Opacidade da arte no altar
+                    Opacidade da arte
                   </label>
                   <span className="font-code tabular-nums text-[#e8cf97]">
                     {config.arteOpacidade}%
@@ -332,36 +329,22 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           <div>
             <ToggleRow
               id="toggle-particulas"
-              label="Brasas arcanas e penas negras"
-              description="Brasas carmesim/douradas subindo e penas caindo nas bordas escuras."
+              label="Brasas arcanas e penas de corvo"
+              description="Brasas carmesim e prateadas subindo, penas caindo e brumas luminosas, desenhadas fora dos recortes."
               checked={config.particulas}
               onToggle={(particulas) => onChange({ ...config, particulas })}
             />
             <ToggleRow
-              id="toggle-corvos"
-              label="Corvos espectrais"
-              description="Silhuetas de corvos cruzam periodicamente o topo e o altar inferior."
-              checked={config.corvos}
-              onToggle={(corvos) => onChange({ ...config, corvos })}
-            />
-            <ToggleRow
-              id="toggle-velas"
-              label="Velas rituais trêmulas"
-              description="Chamas quentes com oscilação orgânica nas laterais do altar."
-              checked={config.velas}
-              onToggle={(velas) => onChange({ ...config, velas })}
-            />
-            <ToggleRow
               id="toggle-runas"
-              label="Círculos rúnicos contra-rotativos"
-              description="Astrolábios antigos com runas girando suavemente atrás das molduras."
+              label="Círculo rúnico"
+              description="Runas antigas girando lentamente atrás da arte da Morgana, no rodapé."
               checked={config.runas}
               onToggle={(runas) => onChange({ ...config, runas })}
             />
             <ToggleRow
               id="toggle-interativo"
-              label="Orbes e runas interativos"
-              description="Passe o mouse ou clique nos orbes, brasão e placa na prévia para ativar runas e corvos."
+              label="Faíscas interativas"
+              description="Mover o mouse ou clicar fora dos recortes solta faíscas carmesim."
               checked={config.interativo}
               onToggle={(interativo) => onChange({ ...config, interativo })}
             />
@@ -372,18 +355,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
               Testar efeitos na prévia
             </h2>
             <p className="mt-1 text-xs text-[#948ca4]">
-              Você também pode clicar diretamente nos orbes carmesim no topo do overlay.
+              O pulso também dispara sozinho a cada 20 segundos durante a live.
             </p>
-            <div className="mt-3 grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={onTriggerRaven}
-                disabled={!config.corvos}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#322940] bg-[#161220] px-3.5 py-2.5 text-xs font-medium text-[#f2e8f8] transition-colors hover:border-[#c59e54] disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c59e54]"
-              >
-                <Feather className="h-3.5 w-3.5 text-[#c59e54]" aria-hidden="true" />
-                Invocar corvo
-              </button>
+            <div className="mt-3 grid grid-cols-1 gap-2.5">
               <button
                 type="button"
                 onClick={onTriggerSurge}

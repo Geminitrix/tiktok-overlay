@@ -1,36 +1,36 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
-  CUTOUT_CLIP_PATH,
+  CUTOUTS,
   DEFAULT_OVERLAY_CONFIG,
   DEFAULT_REPO_NAME,
   buildGithubPagesUrl,
   buildOverlayQuery,
   clampOpacity,
-  escapeHtml,
-  generateDeterministicEmbers,
-  generateRuneRing,
   isOverlayLiveMode,
   parseOverlayParams,
   sanitizeRepoName,
 } from './overlayConfig';
 import { generateGithubReadme, generateStandaloneOverlayHtml } from './exportHtml';
 
+const template = readFileSync(new URL('../../overlay/index.html', import.meta.url), 'utf8');
+
 test('parseOverlayParams preserves defaults and respects original backwards-compatible params', () => {
   const defaults = parseOverlayParams('');
   assert.deepEqual(defaults, DEFAULT_OVERLAY_CONFIG);
 
   const custom = parseOverlayParams(
-    '?fundo=0&nome=MorganaBR&sub=Suporte%20Mestre&particulas=0&arte=0&opacidade=45&corvos=0&velas=0'
+    '?fundo=0&nome=MorganaBR&sub=Suporte%20Mestre&particulas=0&arte=0&opacidade=30&runas=0&rodape=Oi%7CSiga'
   );
   assert.equal(custom.fundo, false);
   assert.equal(custom.nome, 'MORGANABR');
   assert.equal(custom.sub, 'SUPORTE MESTRE');
   assert.equal(custom.particulas, false);
   assert.equal(custom.arte, false);
-  assert.equal(custom.arteOpacidade, 45);
-  assert.equal(custom.corvos, false);
-  assert.equal(custom.velas, false);
+  assert.equal(custom.arteOpacidade, 30);
+  assert.equal(custom.runas, false);
+  assert.equal(custom.rodape, 'OI|SIGA');
 });
 
 test('isOverlayLiveMode detects modo=overlay and live=1', () => {
@@ -50,11 +50,11 @@ test('buildOverlayQuery omits default values and serializes overrides cleanly', 
     ...DEFAULT_OVERLAY_CONFIG,
     nome: 'COVEN QUEEN',
     fundo: false,
-    velas: false,
+    runas: false,
   });
   assert.match(query, /nome=COVEN\+QUEEN/);
   assert.match(query, /fundo=0/);
-  assert.match(query, /velas=0/);
+  assert.match(query, /runas=0/);
 });
 
 test('sanitizeRepoName and buildGithubPagesUrl generate valid GitHub Pages URLs', () => {
@@ -70,24 +70,36 @@ test('sanitizeRepoName and buildGithubPagesUrl generate valid GitHub Pages URLs'
   assert.equal(url, 'https://lumoxgg.github.io/tiktok-overlay/');
 });
 
-test('generateStandaloneOverlayHtml escapes user input and preserves exact 1080x1920 cutouts', () => {
+test('overlay template keeps the exact 1080x1920 transparent cutouts', () => {
+  const { webcam, gameplay } = CUTOUTS;
+  const clip = `M${webcam.x} ${webcam.y}H${webcam.x + webcam.width}V${webcam.y + webcam.height}H${webcam.x}Z M${gameplay.x} ${gameplay.y}H${gameplay.x + gameplay.width}V${gameplay.y + gameplay.height}H${gameplay.x}Z`;
+  assert.ok(template.includes(clip));
+  assert.ok(!/raven|vela|candle/i.test(template));
+});
+
+test('generateStandaloneOverlayHtml embeds config safely and inlines the art', () => {
   const html = generateStandaloneOverlayHtml(
+    template,
     {
       ...DEFAULT_OVERLAY_CONFIG,
-      nome: '<script>alert(1)</script>',
+      nome: '</script><script>alert(1)</script>',
       sub: 'MAIN "MORGANA" & SUPORTE',
+      particulas: false,
     },
     'data:image/png;base64,TESTDATA'
   );
 
   assert.ok(html.startsWith('<!DOCTYPE html>'));
-  assert.ok(html.includes(CUTOUT_CLIP_PATH));
-  assert.ok(html.includes('&lt;SCRIPT&gt;ALERT(1)&lt;/SCRIPT&gt;'));
   assert.ok(!html.includes('<script>alert(1)</script>'));
-  assert.ok(html.includes('data:image/png;base64,TESTDATA'));
-  assert.ok(html.includes('raven-flight'));
-  assert.ok(html.includes('velas-layer'));
-  assert.ok(html.includes('orb-btn'));
+  assert.ok(html.includes('src="data:image/png;base64,TESTDATA"'));
+  assert.ok(!html.includes('src="morgana.png"'));
+
+  const block = html.match(/<script id="coven-config" type="application\/json">([\s\S]*?)<\/script>/);
+  assert.ok(block);
+  const parsed = JSON.parse(block[1]);
+  assert.equal(parsed.nome, '</SCRIPT><SCRIPT>ALERT(1)</SCRIPT>');
+  assert.equal(parsed.sub, 'MAIN "MORGANA" & SUPORTE');
+  assert.equal(parsed.particulas, false);
 });
 
 test('generateGithubReadme documents repository name, cutouts, and query parameters', () => {
@@ -96,13 +108,4 @@ test('generateGithubReadme documents repository name, cutouts, and query paramet
   assert.ok(readme.includes('https://lumox.github.io/tiktok-overlay/'));
   assert.ok(readme.includes('1080×1920'));
   assert.ok(readme.includes('?fundo=0'));
-});
-
-test('deterministic rune ring and ember generators produce stable coordinates', () => {
-  const runes = generateRuneRing(540, 821, 444, 24);
-  assert.equal(runes.length, 24);
-  const embersA = generateDeterministicEmbers(40);
-  const embersB = generateDeterministicEmbers(40);
-  assert.deepEqual(embersA, embersB);
-  assert.equal(escapeHtml('A & B <C>'), 'A &amp; B &lt;C&gt;');
 });
