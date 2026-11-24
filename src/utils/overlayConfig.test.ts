@@ -75,6 +75,8 @@ test('overlay template keeps the exact 1080x1920 transparent cutouts', () => {
   const clip = `M${webcam.x} ${webcam.y}H${webcam.x + webcam.width}V${webcam.y + webcam.height}H${webcam.x}Z M${gameplay.x} ${gameplay.y}H${gameplay.x + gameplay.width}V${gameplay.y + gameplay.height}H${gameplay.x}Z`;
   assert.ok(template.includes(clip));
   assert.ok(!/raven|vela|candle/i.test(template));
+  // versão estática: nada animado ou rodando em loop
+  assert.ok(!/@keyframes|animation|requestAnimationFrame|setInterval/.test(template));
 });
 
 test('generateStandaloneOverlayHtml embeds config safely and inlines the art', () => {
