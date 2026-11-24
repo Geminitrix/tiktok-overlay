@@ -26,6 +26,8 @@
     ?runas=0         desliga o círculo rúnico
     ?interativo=0    desliga as faíscas ao mover/clicar o mouse
     ?demo=1          mostra áreas de exemplo nos recortes (só para conferir no navegador)
+    ?info=1          mostra o tamanho real em que o TikTok está desenhando o overlay
+                     (o ideal é 1080×1920; menos que isso fica borrado ao esticar)
 -->
 <style>
   :root {
@@ -289,6 +291,21 @@
   body.demo { background: #2b2b30; }
   body.demo .demo-slot { display: flex; }
 
+  #info {
+    position: fixed;
+    left: 8px;
+    top: 8px;
+    z-index: 10;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font: 600 14px/1.4 system-ui, sans-serif;
+    color: #fff;
+    background: rgba(0,0,0,0.8);
+    white-space: pre;
+  }
+  #info.ok { box-shadow: inset 4px 0 0 #3ddc84; }
+  #info.low { box-shadow: inset 4px 0 0 #ff2d55; }
+
   #fx { pointer-events: none; }
   #stage.interactive { cursor: crosshair; }
   #stage.interactive #hit { pointer-events: auto; }
@@ -464,11 +481,27 @@
 
   /* ---------- Escala 1080x1920 para qualquer tamanho de fonte ---------- */
   var scale = 1, offX = 0, offY = 0;
+  var info = null;
+  if (flag('info', false)) {
+    info = document.createElement('div');
+    info.id = 'info';
+    document.body.appendChild(info);
+  }
   function fit() {
     scale = Math.min(innerWidth / W, innerHeight / H);
     offX = (innerWidth - W * scale) / 2;
     offY = (innerHeight - H * scale) / 2;
     stage.style.transform = 'translate(' + offX + 'px,' + offY + 'px) scale(' + scale + ')';
+    if (info) {
+      var dpr = window.devicePixelRatio || 1;
+      var drawnW = Math.round(W * scale * dpr), drawnH = Math.round(H * scale * dpr);
+      var good = drawnW >= W - 2;
+      info.className = good ? 'ok' : 'low';
+      info.textContent =
+        'Área do link: ' + innerWidth + '×' + innerHeight + ' (zoom ' + dpr + ')\n' +
+        'Overlay desenhado em: ' + drawnW + '×' + drawnH + ' px\n' +
+        (good ? 'Qualidade máxima' : 'Abaixo de 1080×1920: vai borrar ao esticar');
+    }
   }
   addEventListener('resize', fit);
   fit();
