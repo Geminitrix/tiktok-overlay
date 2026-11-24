@@ -38,6 +38,13 @@ Overlay vertical **1080×1920** para **TikTok LIVE Studio**, inspirado na linha 
 3. Coloque a fonte do overlay **acima** da webcam e do jogo na lista de camadas.
 4. Encaixe a webcam e o jogo nas posições da tabela de recortes.
 
+## Overlay borrado?
+
+O overlay é desenhado no tamanho da área do link. Se o TikTok LIVE Studio cria essa área menor que 1080×1920 e você estica a fonte depois, a imagem é ampliada e perde qualidade. Abra o link com `?info=1` para ver o tamanho real: a etiqueta verde indica qualidade máxima e a vermelha indica que vai borrar.
+
+- Se a fonte Link tiver campos de largura e altura, use **1080 × 1920** em vez de esticar.
+- Se não tiver, use o OBS: crie uma cena 1080×1920 com uma fonte de navegador 1080×1920 apontando para o link, ligue a **Câmera Virtual** e adicione essa câmera no TikTok LIVE Studio.
+
 ## Personalização pela URL
 
 Exemplo: `https://geminitrix.github.io/tiktok-overlay/overlay/?nome=LUMOX&sub=MAIN%20MORGANA`
@@ -54,6 +61,7 @@ Exemplo: `https://geminitrix.github.io/tiktok-overlay/overlay/?nome=LUMOX&sub=MA
 | `runas` | `?runas=0` | Desliga o círculo rúnico |
 | `interativo` | `?interativo=0` | Desliga as faíscas ao mover/clicar o mouse |
 | `demo` | `?demo=1` | Mostra áreas de exemplo nos recortes (só para conferir no navegador) |
+| `info` | `?info=1` | Mostra o tamanho real em que o TikTok desenha o overlay (o ideal é 1080×1920) |
 
 ## Estúdio local
 
