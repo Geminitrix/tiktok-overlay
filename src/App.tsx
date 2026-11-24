@@ -72,7 +72,6 @@ export default function App() {
   const [exportNotice, setExportNotice] = useState<string | null>(null);
 
   const embeddedArtCache = useRef<string | null>(null);
-  const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
   const previewWrapRef = useRef<HTMLDivElement | null>(null);
   const [previewScale, setPreviewScale] = useState(0.36);
 
@@ -180,10 +179,6 @@ export default function App() {
     return () => window.clearTimeout(id);
   }, [previewQuery]);
 
-  const triggerSurge = useCallback(() => {
-    previewFrameRef.current?.contentWindow?.postMessage({ type: 'coven:surge' }, '*');
-  }, []);
-
   const liveOverlayQuery = useMemo(
     () => buildOverlayQuery(config, { includeLiveFlag: true }),
     [config]
@@ -226,7 +221,7 @@ export default function App() {
                 <strong className="font-medium text-[#e7dcc4]">1080 × 1920</strong>
               </span>
               <span className="hidden sm:inline">
-                Mova o mouse ou clique fora dos recortes para soltar faíscas
+                Overlay estático · recortes transparentes
               </span>
             </div>
 
@@ -237,7 +232,6 @@ export default function App() {
               }`}
             >
               <iframe
-                ref={previewFrameRef}
                 title="Prévia do overlay"
                 src={previewSrc}
                 width={scaledWidth}
@@ -264,7 +258,6 @@ export default function App() {
             onChange={setConfig}
             previewBackdrop={previewBackdrop}
             onPreviewBackdropChange={setPreviewBackdrop}
-            onTriggerSurge={triggerSurge}
             onDownloadHtml={handleDownloadHtml}
             onDownloadReadme={handleDownloadReadme}
             onCopyHtml={handleCopyHtml}

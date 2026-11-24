@@ -7,7 +7,6 @@ export interface OverlayConfig {
   arte: boolean;
   arteOpacidade: number; // 0 to 100
   runas: boolean;
-  interativo: boolean;
 }
 
 export const STAGE_WIDTH = 1080;
@@ -26,14 +25,13 @@ export const DEFAULT_REPO_NAME = 'tiktok-overlay';
 export const DEFAULT_OVERLAY_CONFIG: OverlayConfig = {
   nome: 'LUMOX',
   sub: 'MAIN MORGANA · SUPORTE',
-  // Várias mensagens separadas por | se alternam no rodapé do overlay
+  // As 3 frases do rodapé, uma por linha, separadas por |
   rodape: 'BEM-VINDOS À CONGREGAÇÃO|SIGA E ENTRE PARA O COVEN|TOQUE NA TELA · DEIXE SEU LIKE',
   fundo: true,
   particulas: true,
   arte: true,
   arteOpacidade: 45,
   runas: true,
-  interativo: true,
 };
 
 export function clampOpacity(value: number): number {
@@ -89,7 +87,6 @@ export function parseOverlayParams(search: string): OverlayConfig {
     arte: parseBool('arte', DEFAULT_OVERLAY_CONFIG.arte),
     arteOpacidade: parsedOp,
     runas: parseBool('runas', DEFAULT_OVERLAY_CONFIG.runas),
-    interativo: parseBool('interativo', DEFAULT_OVERLAY_CONFIG.interativo),
   };
 }
 
@@ -120,7 +117,6 @@ export function buildOverlayQuery(
     q.set('opacidade', String(clampOpacity(config.arteOpacidade)));
   }
   if (!config.runas) q.set('runas', '0');
-  if (!config.interativo) q.set('interativo', '0');
 
   const serialized = q.toString();
   return serialized ? `?${serialized}` : '';

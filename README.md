@@ -1,18 +1,21 @@
 # Congregação Overlay — TikTok LIVE
 
-Overlay vertical **1080×1920** para **TikTok LIVE Studio**, inspirado na linha de skins **Congregação das Bruxas** (League of Legends). Visual minimalista em obsidiana, prata e carmesim, com animação contínua.
+Overlay vertical **1080×1920** para **TikTok LIVE Studio**, inspirado na linha de skins **Congregação das Bruxas** (League of Legends). Visual minimalista em obsidiana, prata e carmesim, **totalmente estático**: sem animações e sem nada rodando em loop, para pesar o mínimo possível na live.
 
-- **Overlay pronto para a live:** [`overlay/index.html`](overlay/index.html) (HTML + CSS + JS puro, sem build)
-- **Estúdio de personalização (React/Vite):** `src/`, gera e exporta o mesmo overlay
+- **Imagem pronta (recomendado):** [`overlay/overlay.png`](overlay/overlay.png) — PNG 1080×1920 com os recortes transparentes
+- **Versão em link (HTML):** [`overlay/index.html`](overlay/index.html) — personalizável pela URL
+- **Estúdio de personalização (React/Vite):** `src/` — gera e exporta o mesmo overlay
 
-## O que se move
+No rodapé ficam fixas as três frases: **Bem-vindos à Congregação**, **Siga e entre para o Coven** e **Toque na tela · Deixe seu like**.
 
-- Energia carmesim percorrendo as molduras da webcam e do gameplay
-- Brasas carmesim e prateadas subindo, penas de corvo caindo e brumas luminosas (canvas, fora dos recortes)
-- Névoa arcana se deslocando no fundo e a arte da Morgana "respirando" no rodapé
-- Brilho correndo no nome, luz deslizando nas linhas da placa e ondas no emblema da lua crescente
-- Mensagens do rodapé se alternando a cada 7 s
-- Pulso arcano a cada 20 s (molduras acendem e soltam faíscas)
+## Usar como imagem no TikTok LIVE Studio (mais leve e mais nítido)
+
+1. Baixe a imagem: abra `https://geminitrix.github.io/tiktok-overlay/overlay/overlay.png`, clique com o botão direito e escolha **Salvar imagem como…**
+2. No TikTok LIVE Studio: **Adicionar fonte → Imagem** e escolha o arquivo `overlay.png`.
+3. Clique com o botão direito na fonte → **Tela cheia → Esticar para a tela** (ou **Ajustar à tela**).
+4. Deixe a imagem **acima** da webcam e do jogo na lista de fontes e encaixe-os nos recortes.
+
+Uma imagem não precisa de navegador por trás, então pesa bem menos que uma fonte Link e aparece sempre em 1080×1920.
 
 ## Recortes transparentes
 
@@ -31,10 +34,10 @@ Overlay vertical **1080×1920** para **TikTok LIVE Studio**, inspirado na linha 
    https://geminitrix.github.io/tiktok-overlay/overlay/
    ```
 
-## Usar no TikTok LIVE Studio
+## Usar como link no TikTok LIVE Studio
 
 1. **Adicionar fonte → Link** (ou *Browser source*).
-2. Cole a URL acima e defina o tamanho **1080 × 1920**.
+2. Cole a URL acima e ligue **Resolução personalizada** com **1080 × 1920**.
 3. Coloque a fonte do overlay **acima** da webcam e do jogo na lista de camadas.
 4. Encaixe a webcam e o jogo nas posições da tabela de recortes.
 
@@ -53,13 +56,12 @@ Exemplo: `https://geminitrix.github.io/tiktok-overlay/overlay/?nome=LUMOX&sub=MA
 | :--- | :--- | :--- |
 | `nome` | `?nome=LUMOX` | Nick principal |
 | `sub` | `?sub=MAIN%20MORGANA` | Subtítulo |
-| `rodape` | `?rodape=BEM-VINDOS%7CSIGA%20O%20CANAL` | Mensagens do rodapé (separe com `%7C`, a barra vertical, para alternar) |
-| `fundo` | `?fundo=0` | Remove o fundo escuro (mantém molduras e partículas) |
+| `rodape` | `?rodape=BEM-VINDOS%7CSIGA%20O%20CANAL%7CDEIXE%20SEU%20LIKE` | As 3 frases do rodapé, separadas por `%7C` (barra vertical) |
+| `fundo` | `?fundo=0` | Remove o fundo escuro (mantém molduras) |
 | `arte` | `?arte=0` | Esconde a arte da Morgana |
 | `opacidade` | `?opacidade=60` | Opacidade da arte (0–100, padrão 45) |
-| `particulas` | `?particulas=0` | Desliga as partículas |
-| `runas` | `?runas=0` | Desliga o círculo rúnico |
-| `interativo` | `?interativo=0` | Desliga as faíscas ao mover/clicar o mouse |
+| `particulas` | `?particulas=0` | Tira as brasas e penas decorativas |
+| `runas` | `?runas=0` | Tira o círculo rúnico |
 | `demo` | `?demo=1` | Mostra áreas de exemplo nos recortes (só para conferir no navegador) |
 | `info` | `?info=1` | Mostra o tamanho real em que o TikTok desenha o overlay (o ideal é 1080×1920) |
 
@@ -70,4 +72,6 @@ npm install --legacy-peer-deps
 npm run dev
 ```
 
-Abra `http://localhost:3000` para editar o texto, ver a prévia ao vivo e baixar um `index.html` de arquivo único (arte embutida).
+Abra `http://localhost:3000` para editar o texto, ver a prévia e baixar um `index.html` de arquivo único (arte embutida).
+
+Para gerar de novo o `overlay/overlay.png` depois de mudar o HTML, tire um print de `overlay/index.html` em 1080×1920 com fundo transparente (por exemplo, com o Playwright: `page.screenshot({ omitBackground: true })`).

@@ -13,7 +13,7 @@ interface StudioHeaderProps {
 
 const TABS: { id: StudioTab; label: string }[] = [
   { id: 'personalizar', label: 'Personalizar' },
-  { id: 'animacoes', label: 'Animações' },
+  { id: 'animacoes', label: 'Decoração' },
   { id: 'github', label: 'GitHub & TikTok' },
 ];
 

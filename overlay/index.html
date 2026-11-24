@@ -8,7 +8,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 <!--
-  ===== Congregação das Bruxas — Overlay vertical 1080x1920 para TikTok LIVE Studio =====
+  ===== Congregação das Bruxas — Overlay vertical 1080x1920 (versão estática) =====
+
+  Totalmente estático: sem animações, sem canvas e sem nada rodando em loop,
+  para pesar o mínimo possível no TikTok LIVE Studio.
+
+  Dica: a forma mais leve e nítida é usar a imagem pronta overlay.png
+  (mesma pasta) como fonte "Imagem" no TikTok LIVE Studio.
 
   Recortes transparentes (posicione suas fontes no TikTok LIVE Studio exatamente aqui):
     Webcam   → x 60,  y 190, 960 × 540
@@ -17,28 +23,18 @@
   Parâmetros opcionais na URL (ex.: .../overlay/?nome=SEUNICK&sub=MAIN%20MORGANA):
     ?nome=Texto      nome principal (até 26 caracteres)
     ?sub=Texto       subtítulo (até 48 caracteres)
-    ?rodape=Texto    mensagens do rodapé; separe várias com | para alternar
+    ?rodape=A|B|C    as 3 frases do rodapé, uma por linha, separadas por |
                      (ex.: ?rodape=BEM-VINDOS|SIGA O CANAL|DEIXE SEU LIKE)
-    ?fundo=0         remove o fundo escuro (mantém molduras e partículas)
+    ?fundo=0         remove o fundo escuro (mantém molduras)
     ?arte=0          esconde a arte da Morgana no rodapé
     ?opacidade=45    opacidade da arte (0 a 100)
-    ?particulas=0    desliga as partículas
-    ?runas=0         desliga o círculo rúnico
-    ?interativo=0    desliga as faíscas ao mover/clicar o mouse
+    ?particulas=0    tira as brasas e penas decorativas
+    ?runas=0         tira o círculo rúnico
     ?demo=1          mostra áreas de exemplo nos recortes (só para conferir no navegador)
     ?info=1          mostra o tamanho real em que o TikTok está desenhando o overlay
                      (o ideal é 1080×1920; menos que isso fica borrado ao esticar)
 -->
 <style>
-  :root {
-    --ink: #07060a;
-    --crimson: #ff2d55;
-    --crimson-deep: #9c0f2e;
-    --rose: #ff7a96;
-    --silver: #e6e1ef;
-    --silver-dim: #a69fb6;
-    --teal: #3f8f9c;
-  }
   *, *::before, *::after { box-sizing: border-box; }
   html, body {
     margin: 0;
@@ -56,6 +52,7 @@
     transform-origin: 0 0;
     overflow: hidden;
     user-select: none;
+    pointer-events: none;
     font-family: 'Cinzel', 'Trajan Pro', Georgia, serif;
   }
   .layer {
@@ -63,7 +60,6 @@
     inset: 0;
     width: 1080px;
     height: 1920px;
-    pointer-events: none;
   }
   /* Tudo que é "fundo" fica fora dos recortes da webcam e do gameplay */
   .cut {
@@ -73,34 +69,12 @@
   /* ---------- Fundo ---------- */
   #bg {
     background:
+      radial-gradient(560px 460px at 220px 1590px, rgba(156, 15, 46, 0.42), rgba(156, 15, 46, 0)),
+      radial-gradient(520px 430px at 980px 900px, rgba(38, 92, 108, 0.28), rgba(38, 92, 108, 0)),
+      radial-gradient(520px 320px at 540px 20px, rgba(70, 44, 92, 0.42), rgba(70, 44, 92, 0)),
+      radial-gradient(420px 340px at 960px 1760px, rgba(255, 45, 85, 0.18), rgba(255, 45, 85, 0)),
       radial-gradient(120% 70% at 50% 42%, #14101b 0%, #0b0910 48%, #050407 100%);
   }
-  .mist {
-    position: absolute;
-    border-radius: 50%;
-    will-change: transform;
-  }
-  .mist.m1 {
-    left: -320px; top: 1180px; width: 980px; height: 820px;
-    background: radial-gradient(closest-side, rgba(156, 15, 46, 0.42), rgba(156, 15, 46, 0) 100%);
-    animation: drift-a 22s ease-in-out infinite alternate;
-  }
-  .mist.m2 {
-    right: -360px; top: 520px; width: 920px; height: 760px;
-    background: radial-gradient(closest-side, rgba(38, 92, 108, 0.30), rgba(38, 92, 108, 0) 100%);
-    animation: drift-b 27s ease-in-out infinite alternate;
-  }
-  .mist.m3 {
-    left: 90px; top: -260px; width: 900px; height: 560px;
-    background: radial-gradient(closest-side, rgba(70, 44, 92, 0.40), rgba(70, 44, 92, 0) 100%);
-    animation: drift-b 31s ease-in-out infinite alternate-reverse;
-  }
-  .mist.m4 {
-    right: -260px; top: 1440px; width: 760px; height: 620px;
-    background: radial-gradient(closest-side, rgba(255, 45, 85, 0.20), rgba(255, 45, 85, 0) 100%);
-    animation: drift-a 25s ease-in-out infinite alternate-reverse;
-  }
-
   #art {
     position: absolute;
     left: 0;
@@ -109,7 +83,6 @@
     height: 500px;
     overflow: hidden;
     opacity: 0.45;
-    transition: opacity 0.6s ease;
   }
   #art img {
     position: absolute;
@@ -120,48 +93,14 @@
     filter: saturate(0.9) contrast(1.06) brightness(0.92);
     -webkit-mask-image: radial-gradient(62% 78% at 50% 34%, #000 38%, rgba(0,0,0,0.5) 62%, transparent 86%);
             mask-image: radial-gradient(62% 78% at 50% 34%, #000 38%, rgba(0,0,0,0.5) 62%, transparent 86%);
-    animation: art-breathe 16s ease-in-out infinite alternate;
-    transform-origin: 50% 30%;
   }
   #art::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(7,6,10,0.85) 0%, rgba(7,6,10,0) 22%, rgba(7,6,10,0) 64%, rgba(5,4,7,0.92) 100%);
+    background: linear-gradient(to bottom, rgba(7,6,10,0.85) 0%, rgba(7,6,10,0) 22%, rgba(7,6,10,0) 58%, rgba(5,4,7,0.95) 100%);
   }
-
   #runes { opacity: 0.16; }
-  .spin { animation: spin 140s linear infinite; transform-box: view-box; }
-  .spin-r { animation: spin 110s linear infinite reverse; transform-box: view-box; }
-
-  /* ---------- Molduras ---------- */
-  .glow { animation: breathe 5.5s ease-in-out infinite; }
-  .tracer {
-    fill: none;
-    stroke-dasharray: 70 930;
-    stroke-linecap: round;
-    animation: trace 11s linear infinite;
-  }
-  .tracer.t2 { animation-delay: -5.5s; }
-  .rev .tracer { animation-direction: reverse; }
-  .gem { animation: gem 3.6s ease-in-out infinite; }
-
-  #emblem { animation: float 7s ease-in-out infinite; transform-box: view-box; transform-origin: 540px 96px; }
-  #halo { animation: spin 60s linear infinite; transform-box: view-box; transform-origin: 540px 96px; }
-
-  .ripple {
-    fill: none;
-    stroke: #ff2d55;
-    stroke-width: 1.5;
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: ripple 4.2s cubic-bezier(.2,.6,.3,1) infinite;
-  }
-  .ripple.r2 { animation-delay: -2.1s; }
-
-  /* Pulso arcano periódico */
-  .flash { opacity: 0; }
-  #stage.surge .flash { animation: flash 1.8s ease-out; }
 
   /* ---------- Placa do nome ---------- */
   #plate {
@@ -174,7 +113,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
   }
   .row {
     display: flex;
@@ -189,32 +127,20 @@
     height: 1px;
     min-width: 40px;
   }
-  .line.l { background: linear-gradient(to right, rgba(230,225,239,0), rgba(230,225,239,0.55)); }
-  .line.r { background: linear-gradient(to left, rgba(230,225,239,0), rgba(230,225,239,0.55)); }
+  .line.l { background: linear-gradient(to right, rgba(230,225,239,0), rgba(230,225,239,0.55) 70%, rgba(255,122,150,0.9)); }
+  .line.r { background: linear-gradient(to left, rgba(230,225,239,0), rgba(230,225,239,0.55) 70%, rgba(255,122,150,0.9)); }
   .line i {
     position: absolute;
     top: -5px;
     width: 11px;
     height: 11px;
     transform: rotate(45deg);
-    background: radial-gradient(circle at 35% 35%, #ffc2cf 0%, var(--crimson) 40%, #4d0311 100%);
+    background: radial-gradient(circle at 35% 35%, #ffc2cf 0%, #ff2d55 40%, #4d0311 100%);
     border: 1px solid rgba(230,225,239,0.8);
     box-shadow: 0 0 12px rgba(255,45,85,0.8);
   }
   .line.l i { right: -6px; }
   .line.r i { left: -6px; }
-  .line::after {
-    content: "";
-    position: absolute;
-    top: -1px;
-    width: 70px;
-    height: 3px;
-    border-radius: 3px;
-    background: linear-gradient(to right, rgba(255,45,85,0), rgba(255,122,150,0.95), rgba(255,45,85,0));
-    filter: blur(0.5px);
-    animation: run-l 4.8s cubic-bezier(.55,0,.35,1) infinite;
-  }
-  .line.r::after { animation-name: run-r; }
 
   #nick {
     margin: 0;
@@ -224,13 +150,11 @@
     line-height: 1;
     letter-spacing: 0.26em;
     white-space: nowrap;
-    background: linear-gradient(100deg, #a69fb6 0%, #ece8f4 32%, #ffffff 45%, #ffd6df 50%, #ffffff 55%, #ece8f4 68%, #a69fb6 100%);
-    background-size: 280% 100%;
+    background: linear-gradient(100deg, #a69fb6 0%, #ece8f4 30%, #ffffff 46%, #ffd6df 52%, #ffffff 58%, #ece8f4 72%, #a69fb6 100%);
     -webkit-background-clip: text;
             background-clip: text;
     color: transparent;
     filter: drop-shadow(0 0 16px rgba(255,45,85,0.35)) drop-shadow(0 2px 2px rgba(0,0,0,0.8));
-    animation: shimmer 7s ease-in-out infinite;
   }
   #sub {
     margin-top: 14px;
@@ -238,7 +162,7 @@
     font-weight: 600;
     font-size: 17px;
     letter-spacing: 0.44em;
-    color: var(--rose);
+    color: #ff7a96;
     text-shadow: 0 0 12px rgba(255,45,85,0.55);
     white-space: nowrap;
     opacity: 0.92;
@@ -248,31 +172,56 @@
   #footer {
     position: absolute;
     left: 0;
-    top: 1838px;
+    top: 1768px;
     width: 1080px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .frase {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 26px;
-    pointer-events: none;
+    width: 100%;
   }
-  #footer .bar { width: 96px; height: 1px; }
-  #footer .bar.l { background: linear-gradient(to right, rgba(230,225,239,0), rgba(255,122,150,0.7)); }
-  #footer .bar.r { background: linear-gradient(to left, rgba(230,225,239,0), rgba(255,122,150,0.7)); }
-  #rodape {
+  .frase .bar { width: 96px; height: 1px; }
+  .frase .bar.l { background: linear-gradient(to right, rgba(230,225,239,0), rgba(255,122,150,0.7)); }
+  .frase .bar.r { background: linear-gradient(to left, rgba(230,225,239,0), rgba(255,122,150,0.7)); }
+  #frase1 {
     padding-left: 0.4em;
     font-weight: 600;
-    font-size: 19px;
+    font-size: 21px;
     letter-spacing: 0.4em;
-    color: rgba(236, 230, 244, 0.86);
-    text-shadow: 0 0 14px rgba(0,0,0,0.9), 0 0 22px rgba(255,45,85,0.25);
+    color: rgba(240, 235, 247, 0.92);
+    text-shadow: 0 0 14px rgba(0,0,0,0.9), 0 0 22px rgba(255,45,85,0.3);
     white-space: nowrap;
-    transition: opacity 0.7s ease, filter 0.7s ease, transform 0.9s cubic-bezier(.2,.7,.2,1);
   }
-  #rodape.out {
-    opacity: 0;
-    filter: blur(6px);
-    transform: scale(1.12);
+  #frase2 {
+    padding-left: 0.36em;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.36em;
+    color: rgba(230, 225, 239, 0.82);
+    text-shadow: 0 0 10px rgba(0,0,0,0.9);
+    white-space: nowrap;
+  }
+  #frase3 {
+    padding-left: 0.36em;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.36em;
+    color: #ff7a96;
+    text-shadow: 0 0 12px rgba(255,45,85,0.6), 0 0 10px rgba(0,0,0,0.9);
+    white-space: nowrap;
+  }
+  .heart {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-left: -6px;
+    vertical-align: -1px;
   }
 
   /* ---------- Modo demonstração (?demo=1) ---------- */
@@ -291,6 +240,7 @@
   body.demo { background: #2b2b30; }
   body.demo .demo-slot { display: flex; }
 
+  /* ---------- Diagnóstico (?info=1) ---------- */
   #info {
     position: fixed;
     left: 8px;
@@ -305,28 +255,6 @@
   }
   #info.ok { box-shadow: inset 4px 0 0 #3ddc84; }
   #info.low { box-shadow: inset 4px 0 0 #ff2d55; }
-
-  #fx { pointer-events: none; }
-  #stage.interactive { cursor: crosshair; }
-  #stage.interactive #hit { pointer-events: auto; }
-
-  @keyframes drift-a { from { transform: translate(-40px, 30px) scale(1); } to { transform: translate(60px, -50px) scale(1.12); } }
-  @keyframes drift-b { from { transform: translate(40px, -20px) scale(1.06); } to { transform: translate(-60px, 40px) scale(0.94); } }
-  @keyframes art-breathe { from { transform: scale(1); } to { transform: scale(1.04) translateY(-6px); } }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes ripple { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(2.6); opacity: 0; } }
-  @keyframes breathe { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
-  @keyframes trace { to { stroke-dashoffset: -1000; } }
-  @keyframes gem { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
-  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-  @keyframes flash { 0% { opacity: 0; } 18% { opacity: 0.95; } 100% { opacity: 0; } }
-  @keyframes shimmer { 0%, 30% { background-position: 100% 0; } 70%, 100% { background-position: 0% 0; } }
-  @keyframes run-l { 0% { left: -70px; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
-  @keyframes run-r { 0% { right: -70px; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { right: 100%; opacity: 0; } }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; }
-  }
 </style>
 </head>
 <body>
@@ -336,31 +264,49 @@
   <div class="demo-slot" style="left:60px;top:190px;width:960px;height:540px">WEBCAM 960×540</div>
   <div class="demo-slot" style="left:40px;top:892px;width:1000px;height:563px">GAMEPLAY 1000×563</div>
 
-  <!-- Fundo: névoa arcana, arte da Morgana e círculo rúnico -->
+  <!-- Fundo: obsidiana com névoa, arte da Morgana e círculo rúnico -->
   <div id="bg" class="layer cut">
-    <div class="mist m3"></div>
-    <div class="mist m2"></div>
-    <div class="mist m1"></div>
-    <div class="mist m4"></div>
-
     <div id="art"><img src="morgana.png" alt=""></div>
 
     <svg id="runes" class="layer" viewBox="0 0 1080 1920" width="1080" height="1920" aria-hidden="true">
-      <g class="spin" style="transform-origin:540px 1690px" color="#ff2d55">
+      <g color="#ff2d55">
         <circle cx="540" cy="1690" r="250" fill="none" stroke="currentColor" stroke-width="1.4"/>
         <circle cx="540" cy="1690" r="212" fill="none" stroke="#e6e1ef" stroke-width="1" stroke-dasharray="3 9"/>
+        <circle cx="540" cy="1690" r="290" fill="none" stroke="#e6e1ef" stroke-width="0.8" stroke-dasharray="120 40 6 40"/>
         <g id="rune-glyphs"></g>
       </g>
-      <g class="spin-r" style="transform-origin:540px 1690px">
-        <circle cx="540" cy="1690" r="290" fill="none" stroke="#e6e1ef" stroke-width="0.8" stroke-dasharray="120 40 6 40"/>
-      </g>
+    </svg>
+
+    <!-- Brasas e penas decorativas (fixas) -->
+    <svg id="sparks" class="layer" viewBox="0 0 1080 1920" width="1080" height="1920" aria-hidden="true">
+      <defs>
+        <radialGradient id="g-ember">
+          <stop offset="0" stop-color="#fff"/>
+          <stop offset="0.18" stop-color="#ff2d55"/>
+          <stop offset="0.45" stop-color="#ff2d55" stop-opacity="0.3"/>
+          <stop offset="1" stop-color="#ff2d55" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="g-ember-silver">
+          <stop offset="0" stop-color="#fff"/>
+          <stop offset="0.18" stop-color="#e2dcf2"/>
+          <stop offset="0.45" stop-color="#e2dcf2" stop-opacity="0.3"/>
+          <stop offset="1" stop-color="#e2dcf2" stop-opacity="0"/>
+        </radialGradient>
+        <symbol id="feather" viewBox="-12 -22 24 46" overflow="visible">
+          <path d="M0,20 C9,8 7,-12 0,-20 C-5,-11 -8,6 0,20 Z" fill="#16101e" fill-opacity="0.9" stroke="#d2c8e6" stroke-opacity="0.45" stroke-width="1"/>
+          <path d="M0,23 Q1.2,0 0,-18" fill="none" stroke="#ff5a78" stroke-opacity="0.55" stroke-width="1"/>
+        </symbol>
+      </defs>
+      <g id="ember-dots"></g>
+      <use href="#feather" x="96" y="58" width="24" height="46" transform="rotate(-28 108 81)" opacity="0.7"/>
+      <use href="#feather" x="948" y="96" width="20" height="38" transform="rotate(32 958 115)" opacity="0.55"/>
+      <use href="#feather" x="22" y="1180" width="22" height="42" transform="rotate(14 33 1201)" opacity="0.5"/>
+      <use href="#feather" x="1046" y="1500" width="22" height="42" transform="rotate(-36 1057 1521)" opacity="0.6"/>
+      <use href="#feather" x="150" y="1830" width="20" height="38" transform="rotate(48 160 1849)" opacity="0.45"/>
     </svg>
   </div>
 
-  <!-- Partículas (desenhadas fora dos recortes) -->
-  <canvas id="fx" class="layer" width="1080" height="1920"></canvas>
-
-  <!-- Molduras, emblema e acentos -->
+  <!-- Molduras e emblema -->
   <svg id="frames" class="layer" viewBox="0 0 1080 1920" width="1080" height="1920" aria-hidden="true">
     <defs>
       <linearGradient id="g-silver" x1="0" y1="0" x2="1" y2="1">
@@ -378,6 +324,14 @@
         <stop offset="0.4" stop-color="#ff2d55"/>
         <stop offset="1" stop-color="#4d0311"/>
       </radialGradient>
+      <linearGradient id="g-line-l" x1="150" y1="0" x2="470" y2="0" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#e6e1ef" stop-opacity="0"/>
+        <stop offset="1" stop-color="#e6e1ef" stop-opacity="0.55"/>
+      </linearGradient>
+      <linearGradient id="g-line-r" x1="930" y1="0" x2="610" y2="0" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#e6e1ef" stop-opacity="0"/>
+        <stop offset="1" stop-color="#e6e1ef" stop-opacity="0.55"/>
+      </linearGradient>
       <filter id="f-glow" x="-20%" y="-20%" width="140%" height="140%">
         <feGaussianBlur stdDeviation="3.5" result="b"/>
         <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -393,37 +347,21 @@
     </defs>
 
     <g id="frame-webcam"></g>
-    <g id="frame-gameplay" class="rev"></g>
+    <g id="frame-gameplay"></g>
 
     <!-- Emblema da Congregação: lua crescente com gema -->
     <g id="emblem">
       <path d="M150,96 H470" stroke="url(#g-line-l)" stroke-width="1"/>
       <path d="M610,96 H930" stroke="url(#g-line-r)" stroke-width="1"/>
-      <linearGradient id="g-line-l" x1="150" y1="0" x2="470" y2="0" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="#e6e1ef" stop-opacity="0"/>
-        <stop offset="1" stop-color="#e6e1ef" stop-opacity="0.55"/>
-      </linearGradient>
-      <linearGradient id="g-line-r" x1="930" y1="0" x2="610" y2="0" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="#e6e1ef" stop-opacity="0"/>
-        <stop offset="1" stop-color="#e6e1ef" stop-opacity="0.55"/>
-      </linearGradient>
-      <path class="gem" d="M470,90 L476,96 L470,102 L464,96 Z" fill="url(#g-gem)"/>
-      <path class="gem" d="M610,90 L616,96 L610,102 L604,96 Z" fill="url(#g-gem)"/>
-
-      <g id="halo">
-        <circle cx="540" cy="96" r="50" fill="none" stroke="#ff2d55" stroke-opacity="0.45" stroke-width="1" stroke-dasharray="2 7"/>
-        <path d="M540,40 A56,56 0 0 1 596,96" fill="none" stroke="#e6e1ef" stroke-opacity="0.5" stroke-width="1.2"/>
-        <path d="M540,152 A56,56 0 0 1 484,96" fill="none" stroke="#e6e1ef" stroke-opacity="0.5" stroke-width="1.2"/>
-      </g>
-      <circle class="ripple" cx="540" cy="96" r="30"/>
-      <circle class="ripple r2" cx="540" cy="96" r="30"/>
-      <circle cx="540" cy="96" r="34" fill="#ff2d55" opacity="0.18" filter="url(#f-soft)" class="glow"/>
+      <path d="M470,90 L476,96 L470,102 L464,96 Z" fill="url(#g-gem)"/>
+      <path d="M610,90 L616,96 L610,102 L604,96 Z" fill="url(#g-gem)"/>
+      <circle cx="540" cy="96" r="50" fill="none" stroke="#ff2d55" stroke-opacity="0.45" stroke-width="1" stroke-dasharray="2 7"/>
+      <path d="M540,40 A56,56 0 0 1 596,96" fill="none" stroke="#e6e1ef" stroke-opacity="0.5" stroke-width="1.2"/>
+      <path d="M540,152 A56,56 0 0 1 484,96" fill="none" stroke="#e6e1ef" stroke-opacity="0.5" stroke-width="1.2"/>
+      <circle cx="540" cy="96" r="34" fill="#ff2d55" opacity="0.22" filter="url(#f-soft)"/>
       <rect x="490" y="40" width="100" height="110" fill="url(#g-silver)" mask="url(#m-crescent)"/>
-      <path class="gem" d="M540,72 L549,88 L540,104 L531,88 Z" fill="url(#g-gem)" stroke="#f3eef9" stroke-width="1.2" filter="url(#f-glow)"/>
+      <path d="M540,72 L549,88 L540,104 L531,88 Z" fill="url(#g-gem)" stroke="#f3eef9" stroke-width="1.2" filter="url(#f-glow)"/>
     </g>
-
-    <!-- Brilho do pulso arcano -->
-    <g class="flash" id="flash-layer"></g>
   </svg>
 
   <!-- Placa do nome -->
@@ -436,15 +374,20 @@
     <div id="sub">MAIN MORGANA · SUPORTE</div>
   </div>
 
-  <!-- Rodapé -->
+  <!-- Rodapé com as duas frases -->
   <div id="footer">
-    <span class="bar l"></span>
-    <span id="rodape">BEM-VINDOS À CONGREGAÇÃO</span>
-    <span class="bar r"></span>
+    <div class="frase">
+      <span class="bar l"></span>
+      <span id="frase1">BEM-VINDOS À CONGREGAÇÃO</span>
+      <span class="bar r"></span>
+    </div>
+    <div class="frase">
+      <span id="frase2">SIGA E ENTRE PARA O COVEN</span>
+    </div>
+    <div class="frase">
+      <span id="frase3">TOQUE NA TELA · DEIXE SEU LIKE</span><svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.4 2.6.8-1.4 2.3-2.6 4.4-2.6 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z" fill="#ff2d55"/></svg>
+    </div>
   </div>
-
-  <!-- Camada de interação (mouse) fora dos recortes -->
-  <div id="hit" class="layer cut"></div>
 </div>
 
 <!-- Configuração padrão (o estúdio preenche este bloco ao exportar; a URL sempre tem prioridade) -->
@@ -453,10 +396,11 @@
 (function () {
   'use strict';
 
+  // Tudo aqui roda uma única vez ao abrir a página: não há animações nem loops.
   var W = 1080, H = 1920;
   var CUTS = [
-    { id: 'webcam',   x: 60, y: 190, w: 960,  h: 540 },
-    { id: 'gameplay', x: 40, y: 892, w: 1000, h: 563 }
+    { x: 60, y: 190, w: 960,  h: 540 },
+    { x: 40, y: 892, w: 1000, h: 563 }
   ];
   var SVGNS = 'http://www.w3.org/2000/svg';
   var q = new URLSearchParams(location.search);
@@ -466,7 +410,6 @@
     if (!q.has(k) && defaults[k] !== null && defaults[k] !== undefined) q.set(k, String(defaults[k]));
   });
   var stage = document.getElementById('stage');
-  var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function flag(key, fallback) {
     var v = q.get(key);
@@ -480,7 +423,6 @@
   }
 
   /* ---------- Escala 1080x1920 para qualquer tamanho de fonte ---------- */
-  var scale = 1, offX = 0, offY = 0;
   var info = null;
   if (flag('info', false)) {
     info = document.createElement('div');
@@ -488,9 +430,9 @@
     document.body.appendChild(info);
   }
   function fit() {
-    scale = Math.min(innerWidth / W, innerHeight / H);
-    offX = (innerWidth - W * scale) / 2;
-    offY = (innerHeight - H * scale) / 2;
+    var scale = Math.min(innerWidth / W, innerHeight / H);
+    var offX = (innerWidth - W * scale) / 2;
+    var offY = (innerHeight - H * scale) / 2;
     stage.style.transform = 'translate(' + offX + 'px,' + offY + 'px) scale(' + scale + ')';
     if (info) {
       var dpr = window.devicePixelRatio || 1;
@@ -509,56 +451,48 @@
   /* ---------- Configuração via URL ---------- */
   var nick = document.getElementById('nick');
   var sub = document.getElementById('sub');
-  var rodape = document.getElementById('rodape');
+  var frase1 = document.getElementById('frase1');
+  var frase2 = document.getElementById('frase2');
+  var frase3 = document.getElementById('frase3');
   var t;
   if ((t = text('nome', 26))) nick.textContent = t;
   if ((t = text('sub', 48))) sub.textContent = t;
-  var messages = ['BEM-VINDOS À CONGREGAÇÃO', 'SIGA E ENTRE PARA O COVEN', 'TOQUE NA TELA · DEIXE SEU LIKE'];
-  var rawMsgs = (q.get('rodape') || '').split('|').map(function (m) { return m.trim().slice(0, 52).toUpperCase(); })
+  var frases = (q.get('rodape') || '').split('|')
+    .map(function (m) { return m.trim().slice(0, 52).toUpperCase(); })
     .filter(Boolean);
-  if (rawMsgs.length) messages = rawMsgs;
-  rodape.textContent = messages[0];
+  if (frases[0]) frase1.textContent = frases[0];
+  if (frases[1]) frase2.textContent = frases[1];
+  if (frases[2]) frase3.textContent = frases[2];
 
   if (!flag('fundo', true)) document.getElementById('bg').style.display = 'none';
   var art = document.getElementById('art');
   if (!flag('arte', true)) art.style.display = 'none';
   var op = Number(q.get('opacidade'));
-  if (q.get('opacidade') !== null && isFinite(op)) art.style.opacity = Math.max(0, Math.min(100, op)) / 100;
+  if (q.get('opacidade') !== null && q.get('opacidade') !== '' && isFinite(op)) {
+    art.style.opacity = Math.max(0, Math.min(100, op)) / 100;
+  }
   if (!flag('runas', true)) document.getElementById('runes').style.display = 'none';
+  if (!flag('particulas', true)) document.getElementById('sparks').style.display = 'none';
   if (flag('demo', false)) document.body.classList.add('demo');
-  var interactive = flag('interativo', true);
-  if (interactive) stage.classList.add('interactive');
 
-  // Ajusta o tamanho do nome para nunca encostar nas bordas
+  // Ajusta o tamanho dos textos para nunca encostarem nas bordas
   function fitText(el, maxWidth, maxSize, minSize) {
     var size = maxSize;
     el.style.fontSize = size + 'px';
     while (el.scrollWidth > maxWidth && size > minSize) {
-      size -= 2;
+      size -= 1;
       el.style.fontSize = size + 'px';
     }
   }
   function fitAll() {
     fitText(nick, 700, 66, 30);
     fitText(sub, 880, 17, 11);
-    fitText(rodape, 760, 19, 12);
+    fitText(frase1, 740, 21, 12);
+    fitText(frase2, 820, 16, 11);
+    fitText(frase3, 800, 16, 11);
   }
   fitAll();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
-
-  // Mensagens do rodapé se alternando
-  if (messages.length > 1) {
-    var msgIdx = 0;
-    setInterval(function () {
-      rodape.classList.add('out');
-      setTimeout(function () {
-        msgIdx = (msgIdx + 1) % messages.length;
-        rodape.textContent = messages[msgIdx];
-        fitText(rodape, 760, 19, 12);
-        rodape.classList.remove('out');
-      }, 800);
-    }, 7000);
-  }
 
   /* ---------- Molduras ---------- */
   function el(tag, attrs, parent) {
@@ -570,53 +504,45 @@
   function diamond(cx, cy, r) {
     return 'M' + cx + ',' + (cy - r) + ' L' + (cx + r) + ',' + cy + ' L' + cx + ',' + (cy + r) + ' L' + (cx - r) + ',' + cy + ' Z';
   }
-  function buildFrame(c, g, flashLayer) {
+  // Trechos de "energia" carmesim fixos, como acentos (fração do perímetro, comprimento)
+  var ACCENTS = [[0.06, 0.07], [0.56, 0.07]];
+  function buildFrame(c, g, accentShift) {
     var x = c.x, y = c.y, X = c.x + c.w, Y = c.y + c.h;
     var o = 12, L = 58;
 
-    // halo suave que respira
     el('rect', { x: x - 3, y: y - 3, width: c.w + 6, height: c.h + 6, fill: 'none',
-      stroke: '#ff2d55', 'stroke-width': 8, filter: 'url(#f-soft)', 'class': 'glow' }, g);
-    // contorno fino externo
+      stroke: '#ff2d55', 'stroke-width': 8, filter: 'url(#f-soft)', opacity: 0.22 }, g);
     el('rect', { x: x - o, y: y - o, width: c.w + 2 * o, height: c.h + 2 * o, fill: 'none',
       stroke: '#e6e1ef', 'stroke-opacity': 0.14, 'stroke-width': 1 }, g);
-    // borda principal
     el('rect', { x: x - 1, y: y - 1, width: c.w + 2, height: c.h + 2, fill: 'none',
       stroke: 'url(#g-edge)', 'stroke-width': 2 }, g);
-    // energia percorrendo a moldura
-    [1, 2].forEach(function (i) {
-      el('rect', { x: x - 1, y: y - 1, width: c.w + 2, height: c.h + 2, pathLength: 1000,
-        'class': 'tracer t' + i, stroke: '#ff2d55', 'stroke-width': 5, filter: 'url(#f-glow)', opacity: 0.85 }, g);
-      el('rect', { x: x - 1, y: y - 1, width: c.w + 2, height: c.h + 2, pathLength: 1000,
-        'class': 'tracer t' + i, stroke: '#ffe3ea', 'stroke-width': 1.6 }, g);
+    ACCENTS.forEach(function (a) {
+      var start = ((a[0] + accentShift) % 1) * 1000, len = a[1] * 1000;
+      var dash = len + ' ' + (1000 - len);
+      el('rect', { x: x - 1, y: y - 1, width: c.w + 2, height: c.h + 2, pathLength: 1000, fill: 'none',
+        stroke: '#ff2d55', 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-dasharray': dash,
+        'stroke-dashoffset': -start, filter: 'url(#f-glow)', opacity: 0.85 }, g);
+      el('rect', { x: x - 1, y: y - 1, width: c.w + 2, height: c.h + 2, pathLength: 1000, fill: 'none',
+        stroke: '#ffe3ea', 'stroke-width': 1.6, 'stroke-linecap': 'round', 'stroke-dasharray': dash,
+        'stroke-dashoffset': -start }, g);
     });
-    // cantos em lâmina prateada
     var a = x - o, b = y - o, A = X + o, B = Y + o;
-    var corners = [
+    [
       'M' + a + ',' + (b + L) + ' V' + b + ' H' + (a + L),
       'M' + (A - L) + ',' + b + ' H' + A + ' V' + (b + L),
       'M' + A + ',' + (B - L) + ' V' + B + ' H' + (A - L),
       'M' + (a + L) + ',' + B + ' H' + a + ' V' + (B - L)
-    ];
-    corners.forEach(function (d) {
+    ].forEach(function (d) {
       el('path', { d: d, fill: 'none', stroke: 'url(#g-silver)', 'stroke-width': 3, 'stroke-linecap': 'square' }, g);
     });
     [[a, b], [A, b], [A, B], [a, B]].forEach(function (p) {
-      el('path', { d: diamond(p[0], p[1], 7), fill: 'url(#g-gem)', stroke: '#f3eef9', 'stroke-width': 1.1, 'class': 'gem' }, g);
+      el('path', { d: diamond(p[0], p[1], 7), fill: 'url(#g-gem)', stroke: '#f3eef9', 'stroke-width': 1.1 }, g);
     });
-    // pequenos marcadores no meio das laterais
     el('path', { d: diamond(a, (b + B) / 2, 4), fill: '#e6e1ef', opacity: 0.6 }, g);
     el('path', { d: diamond(A, (b + B) / 2, 4), fill: '#e6e1ef', opacity: 0.6 }, g);
-
-    // brilho do pulso arcano
-    el('rect', { x: x - 2, y: y - 2, width: c.w + 4, height: c.h + 4, fill: 'none',
-      stroke: '#ff4d6d', 'stroke-width': 14, filter: 'url(#f-soft)' }, flashLayer);
-    el('rect', { x: x - 1, y: y - 1, width: c.w + 2, height: c.h + 2, fill: 'none',
-      stroke: '#ffe3ea', 'stroke-width': 2 }, flashLayer);
   }
-  var flashLayer = document.getElementById('flash-layer');
-  buildFrame(CUTS[0], document.getElementById('frame-webcam'), flashLayer);
-  buildFrame(CUTS[1], document.getElementById('frame-gameplay'), flashLayer);
+  buildFrame(CUTS[0], document.getElementById('frame-webcam'), 0);
+  buildFrame(CUTS[1], document.getElementById('frame-gameplay'), 0.25);
 
   /* ---------- Runas antigas ---------- */
   var RUNES = [
@@ -639,203 +565,33 @@
     }, glyphs);
   }
 
-  /* ---------- Partículas ---------- */
-  var cv = document.getElementById('fx');
-  var particlesOn = flag('particulas', true);
-  if (!particlesOn) { cv.style.display = 'none'; }
-  var ctx = cv.getContext('2d');
-
-  var clip = new Path2D();
-  clip.rect(0, 0, W, H);
-  CUTS.forEach(function (c) { clip.rect(c.x, c.y, c.w, c.h); });
-
-  function rnd(a, b) { return a + Math.random() * (b - a); }
-
-  function sprite(r, g, b) {
-    var s = document.createElement('canvas');
-    s.width = s.height = 64;
-    var c = s.getContext('2d');
-    var gr = c.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gr.addColorStop(0, 'rgba(255,255,255,1)');
-    gr.addColorStop(0.16, 'rgba(' + r + ',' + g + ',' + b + ',1)');
-    gr.addColorStop(0.42, 'rgba(' + r + ',' + g + ',' + b + ',0.32)');
-    gr.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b + ',0)');
-    c.fillStyle = gr;
-    c.fillRect(0, 0, 64, 64);
-    return s;
+  /* ---------- Brasas fixas (posições sempre iguais) ---------- */
+  var seed = 26082026;
+  function rand() {
+    seed = (seed + 0x6d2b79f5) | 0;
+    var r = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
   }
-  var SPR = {
-    crimson: sprite(255, 45, 85),
-    rose: sprite(255, 130, 160),
-    silver: sprite(226, 220, 242),
-    teal: sprite(90, 190, 205)
-  };
-  function pickColor() {
-    var r = Math.random();
-    return r < 0.58 ? 'crimson' : r < 0.78 ? 'rose' : r < 0.94 ? 'silver' : 'teal';
-  }
-
-  var embers = [], feathers = [], wisps = [], sparks = [];
-  var density = reduced ? 0.4 : 1;
-
-  function newEmber(initial) {
-    var life = rnd(7, 15);
-    return {
-      x: rnd(0, W), y: initial ? rnd(0, H) : rnd(H * 0.45, H + 30),
-      vy: -rnd(18, 60), vx: rnd(-6, 6),
-      size: rnd(5, 17), life: life, age: initial ? rnd(0, life) : 0,
-      amp: rnd(8, 30), freq: rnd(0.2, 0.6), ph: rnd(0, 6.28),
-      tw: rnd(1.5, 4), col: pickColor()
-    };
-  }
-  function newFeather(initial) {
-    var life = rnd(14, 22);
-    return {
-      x: rnd(20, W - 20), y: initial ? rnd(-60, H * 0.7) : rnd(-80, -20),
-      vy: rnd(22, 42), size: rnd(16, 30), life: life, age: initial ? rnd(0, life) : 0,
-      amp: rnd(30, 70), freq: rnd(0.25, 0.5), ph: rnd(0, 6.28), rot: rnd(-0.6, 0.6)
-    };
-  }
-  function newWisp() {
-    return {
-      x: rnd(0, W), y: rnd(0, H), r: rnd(120, 260),
-      vx: rnd(-8, 8), vy: rnd(-10, -3), a: rnd(0.04, 0.09),
-      col: Math.random() < 0.7 ? 'crimson' : 'teal', ph: rnd(0, 6.28)
-    };
-  }
-  for (var e = 0; e < Math.round(80 * density); e++) embers.push(newEmber(true));
-  for (var f = 0; f < Math.round(7 * density); f++) feathers.push(newFeather(true));
-  for (var w = 0; w < Math.round(6 * density); w++) wisps.push(newWisp());
-
-  function burst(x, y, n, spread) {
-    for (var k = 0; k < n; k++) {
-      var ang = rnd(0, Math.PI * 2), sp = rnd(40, spread || 220);
-      sparks.push({
-        x: x, y: y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 30,
-        size: rnd(4, 12), life: rnd(0.9, 2.1), age: 0, col: Math.random() < 0.75 ? 'crimson' : 'silver'
-      });
-    }
-  }
-
-  function drawFeather(p, alpha) {
-    var s = p.size;
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.rot + Math.sin(p.age * p.freq * 4 + p.ph) * 0.5);
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    ctx.moveTo(0, s);
-    ctx.bezierCurveTo(s * 0.42, s * 0.4, s * 0.34, -s * 0.6, 0, -s);
-    ctx.bezierCurveTo(-s * 0.22, -s * 0.55, -s * 0.36, s * 0.3, 0, s);
-    ctx.fillStyle = 'rgba(22,16,30,0.9)';
-    ctx.fill();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(210,200,230,0.45)';
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(0, s * 1.15);
-    ctx.quadraticCurveTo(s * 0.06, 0, 0, -s * 0.9);
-    ctx.strokeStyle = 'rgba(255,90,120,0.55)';
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  var last = performance.now();
-  function frame(now) {
-    var dt = Math.min(0.05, (now - last) / 1000);
-    last = now;
-
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, W, H);
-    ctx.save();
-    ctx.clip(clip, 'evenodd');
-
-    // brumas luminosas (bokeh)
-    ctx.globalCompositeOperation = 'lighter';
-    wisps.forEach(function (p) {
-      p.x += p.vx * dt; p.y += p.vy * dt; p.ph += dt * 0.3;
-      if (p.y < -p.r) { p.y = H + p.r; p.x = rnd(0, W); }
-      if (p.x < -p.r) p.x = W + p.r; else if (p.x > W + p.r) p.x = -p.r;
-      ctx.globalAlpha = p.a * (0.7 + 0.3 * Math.sin(p.ph));
-      ctx.drawImage(SPR[p.col], p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+  function insideCut(px, py, pad) {
+    return CUTS.some(function (c) {
+      return px > c.x - pad && px < c.x + c.w + pad && py > c.y - pad && py < c.y + c.h + pad;
     });
-
-    // brasas subindo
-    embers.forEach(function (p, idx) {
-      p.age += dt;
-      if (p.age >= p.life || p.y < -40) { embers[idx] = newEmber(false); return; }
-      p.y += p.vy * dt;
-      var x = p.x + Math.sin(p.age * p.freq * 6.28 + p.ph) * p.amp + p.vx * p.age;
-      var env = Math.sin(Math.PI * p.age / p.life);
-      var tw = 0.65 + 0.35 * Math.sin(p.age * p.tw * 6.28 + p.ph);
-      ctx.globalAlpha = Math.max(0, env * tw);
-      ctx.drawImage(SPR[p.col], x - p.size / 2, p.y - p.size / 2, p.size, p.size);
-    });
-
-    // faíscas de explosão
-    for (var k = sparks.length - 1; k >= 0; k--) {
-      var s = sparks[k];
-      s.age += dt;
-      if (s.age >= s.life) { sparks.splice(k, 1); continue; }
-      s.vx *= 1 - 1.8 * dt; s.vy = s.vy * (1 - 1.8 * dt) - 20 * dt;
-      s.x += s.vx * dt; s.y += s.vy * dt;
-      ctx.globalAlpha = 1 - s.age / s.life;
-      ctx.drawImage(SPR[s.col], s.x - s.size / 2, s.y - s.size / 2, s.size, s.size);
-    }
-
-    // penas de corvo caindo
-    ctx.globalCompositeOperation = 'source-over';
-    feathers.forEach(function (p, idx) {
-      p.age += dt;
-      if (p.age >= p.life || p.y > H + 60) { feathers[idx] = newFeather(false); return; }
-      p.y += p.vy * dt;
-      var env = Math.min(1, p.age / 2, (p.life - p.age) / 2);
-      var px = p.x + Math.sin(p.age * p.freq * 6.28 + p.ph) * p.amp;
-      drawFeather({ x: px, y: p.y, size: p.size, rot: p.rot, age: p.age, freq: p.freq, ph: p.ph }, 0.75 * Math.max(0, env));
-    });
-
-    ctx.restore();
-    requestAnimationFrame(frame);
   }
-  if (particlesOn) requestAnimationFrame(frame);
-
-  /* ---------- Pulso arcano periódico ---------- */
-  function surge() {
-    stage.classList.remove('surge');
-    void stage.offsetWidth;
-    stage.classList.add('surge');
-    if (particlesOn) {
-      for (var i = 0; i < 14; i++) burst(rnd(70, 1010), rnd(752, 872), 3, 140);
-      burst(540, 96, 18, 200);
-    }
-  }
-  if (!reduced) {
-    setTimeout(surge, 2500);
-    setInterval(surge, 20000);
-  }
-  // Permite disparar o pulso a partir do estúdio (prévia em iframe)
-  addEventListener('message', function (ev) {
-    if (ev.data && ev.data.type === 'coven:surge') surge();
-  });
-
-  /* ---------- Interação (mouse / clique) ---------- */
-  if (interactive && particlesOn) {
-    var hit = document.getElementById('hit');
-    var lastTrail = 0;
-    function toStage(ev) {
-      return { x: (ev.clientX - offX) / scale, y: (ev.clientY - offY) / scale };
-    }
-    hit.addEventListener('pointermove', function (ev) {
-      var now = performance.now();
-      if (now - lastTrail < 40) return;
-      lastTrail = now;
-      var p = toStage(ev);
-      burst(p.x, p.y, 2, 60);
-    });
-    hit.addEventListener('pointerdown', function (ev) {
-      var p = toStage(ev);
-      burst(p.x, p.y, 34, 260);
-    });
+  var dots = document.getElementById('ember-dots');
+  var placed = 0, tries = 0;
+  while (placed < 46 && tries < 2000) {
+    tries++;
+    var ex = rand() * W, ey = rand() * H, size = 4 + rand() * 12;
+    if (insideCut(ex, ey, 22)) continue;
+    // menos brasas sobre os textos da placa
+    if (ey > 760 && ey < 870 && ex > 250 && ex < 830) continue;
+    el('circle', {
+      cx: ex.toFixed(1), cy: ey.toFixed(1), r: (size / 2).toFixed(1),
+      fill: rand() < 0.75 ? 'url(#g-ember)' : 'url(#g-ember-silver)',
+      opacity: (0.35 + rand() * 0.6).toFixed(2)
+    }, dots);
+    placed++;
   }
 })();
 </script>

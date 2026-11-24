@@ -41,7 +41,6 @@ export function generateStandaloneOverlayHtml(
     opacidade: clampOpacity(config.arteOpacidade),
     particulas: config.particulas,
     runas: config.runas,
-    interativo: config.interativo,
   };
   const safeArt = artSrc.replace(/"/g, '%22');
   return template
@@ -68,7 +67,7 @@ Overlay vertical **1080×1920** para **TikTok LIVE Studio / OBS**, inspirado na 
   - Webcam: \`x=60, y=190, 960×540\`
   - Gameplay: \`x=40, y=892, 1000×563\`
 - **Visual minimalista**: obsidiana, prata e carmesim, lua crescente da Congregação e molduras finas com cantos em lâmina.
-- **Animações fluidas**: energia carmesim percorrendo as molduras, brasas e penas em canvas, névoa arcana, brilho no nome, mensagens alternadas no rodapé e um pulso arcano periódico.
+- **Totalmente estático e leve**: sem animações nem loops, ideal para o TikTok LIVE Studio. As três frases do rodapé ficam fixas, uma por linha.
 
 ## Como usar no GitHub Pages + TikTok LIVE Studio
 
@@ -87,13 +86,12 @@ Overlay vertical **1080×1920** para **TikTok LIVE Studio / OBS**, inspirado na 
 | :--- | :--- | :--- |
 | \`nome\` | \`?nome=${encodeURIComponent(config.nome || 'LUMOX')}\` | Nick principal na placa |
 | \`sub\` | \`?sub=${encodeURIComponent(config.sub || 'MAIN MORGANA · SUPORTE')}\` | Subtítulo |
-| \`rodape\` | \`?rodape=BEM-VINDOS%7CSIGA%20O%20CANAL\` | Mensagens do rodapé (separe com barra vertical, \`%7C\`, para alternar) |
+| \`rodape\` | \`?rodape=BEM-VINDOS%7CSIGA%20O%20CANAL%7CDEIXE%20SEU%20LIKE\` | As 3 frases do rodapé, separadas por barra vertical (\`%7C\`) |
 | \`fundo\` | \`?fundo=0\` | Remove o fundo escuro (mantém molduras e partículas) |
 | \`arte\` | \`?arte=0\` | Oculta a arte da Morgana no rodapé |
 | \`opacidade\` | \`?opacidade=${clampOpacity(config.arteOpacidade)}\` | Opacidade da arte (0–100) |
-| \`particulas\` | \`?particulas=0\` | Desliga brasas e penas |
-| \`runas\` | \`?runas=0\` | Desliga o círculo rúnico |
-| \`interativo\` | \`?interativo=0\` | Desliga as faíscas ao mover/clicar o mouse |
+| \`particulas\` | \`?particulas=0\` | Tira as brasas e penas decorativas |
+| \`runas\` | \`?runas=0\` | Tira o círculo rúnico |
 | \`demo\` | \`?demo=1\` | Mostra áreas de exemplo nos recortes (só para conferir) |
 `;
 }

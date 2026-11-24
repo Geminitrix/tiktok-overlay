@@ -6,9 +6,8 @@ import {
   ExternalLink,
   FileCode2,
   FileText,
-  Flame,
+  Gauge,
   RotateCcw,
-  Sparkles,
 } from 'lucide-react';
 import {
   DEFAULT_OVERLAY_CONFIG,
@@ -25,7 +24,6 @@ interface ControlPanelProps {
   onChange: (next: OverlayConfig) => void;
   previewBackdrop: 'simulated' | 'checkerboard';
   onPreviewBackdropChange: (mode: 'simulated' | 'checkerboard') => void;
-  onTriggerSurge: () => void;
   onDownloadHtml: (embedArt: boolean) => void;
   onDownloadReadme: () => void;
   onCopyHtml: () => Promise<void>;
@@ -88,7 +86,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onChange,
   previewBackdrop,
   onPreviewBackdropChange,
-  onTriggerSurge,
   onDownloadHtml,
   onDownloadReadme,
   onCopyHtml,
@@ -215,7 +212,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 htmlFor="input-rodape"
                 className="mb-1 block text-xs font-medium tracking-wide text-[#cfc6db]"
               >
-                Mensagens do rodapé (separe com | para alternar)
+                Frases do rodapé (até 3, separadas por |)
               </label>
               <input
                 id="input-rodape"
@@ -314,70 +311,44 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
       )}
 
-      {/* Tab 2: Animações & Interatividade */}
+      {/* Tab 2: Decoração */}
       {activeTab === 'animacoes' && (
         <div className="p-5 sm:p-6 space-y-6">
           <div className="border-b border-[#1f1a28] pb-4">
             <h1 className="font-coven text-lg font-bold tracking-[0.06em] text-[#f4e7cd]">
-              Animações e Interações
+              Decoração
             </h1>
             <p className="mt-1 text-xs text-[#948ca4]">
-              Efeitos leves em GPU que mantêm a live fluida e nunca cobrem a câmera ou gameplay.
+              Detalhes fixos que nunca cobrem a câmera ou o gameplay.
             </p>
           </div>
 
           <div>
             <ToggleRow
               id="toggle-particulas"
-              label="Brasas arcanas e penas de corvo"
-              description="Brasas carmesim e prateadas subindo, penas caindo e brumas luminosas, desenhadas fora dos recortes."
+              label="Brasas e penas de corvo"
+              description="Brasas carmesim e prateadas e algumas penas espalhadas fora dos recortes."
               checked={config.particulas}
               onToggle={(particulas) => onChange({ ...config, particulas })}
             />
             <ToggleRow
               id="toggle-runas"
               label="Círculo rúnico"
-              description="Runas antigas girando lentamente atrás da arte da Morgana, no rodapé."
+              description="Runas antigas atrás da arte da Morgana, no rodapé."
               checked={config.runas}
               onToggle={(runas) => onChange({ ...config, runas })}
             />
-            <ToggleRow
-              id="toggle-interativo"
-              label="Faíscas interativas"
-              description="Mover o mouse ou clicar fora dos recortes solta faíscas carmesim."
-              checked={config.interativo}
-              onToggle={(interativo) => onChange({ ...config, interativo })}
-            />
-          </div>
-
-          <div className="border-t border-[#1f1a28] pt-5">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c59e54]">
-              Testar efeitos na prévia
-            </h2>
-            <p className="mt-1 text-xs text-[#948ca4]">
-              O pulso também dispara sozinho a cada 20 segundos durante a live.
-            </p>
-            <div className="mt-3 grid grid-cols-1 gap-2.5">
-              <button
-                type="button"
-                onClick={onTriggerSurge}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#4a1c2a] bg-[#220e16] px-3.5 py-2.5 text-xs font-medium text-[#ffd6de] transition-colors hover:border-[#e3264a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e3264a]"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-[#ff4d6d]" aria-hidden="true" />
-                Pulso arcano
-              </button>
-            </div>
           </div>
 
           <div className="rounded-lg border border-[#221c2c] bg-[#120f18] p-3.5 text-xs leading-relaxed text-[#a69eb6]">
             <div className="flex items-center gap-2 font-medium text-[#e8d5ad]">
-              <Flame className="h-3.5 w-3.5 text-[#e8983e]" aria-hidden="true" />
+              <Gauge className="h-3.5 w-3.5 text-[#e8983e]" aria-hidden="true" />
               Desempenho para live
             </div>
             <p className="mt-1">
-              Todas as animações usam transformações aceleradas em GPU e respeitam os recortes
-              transparentes (<span className="font-code text-[#d8cfe4]">clip-path: evenodd</span>),
-              mantendo baixo uso de CPU no TikTok LIVE Studio.
+              O overlay é totalmente estático: sem animações nem nada rodando em loop. Para pesar
+              ainda menos, use a imagem <span className="font-code text-[#d8cfe4]">overlay.png</span>{' '}
+              como fonte Imagem no TikTok LIVE Studio.
             </p>
           </div>
         </div>
